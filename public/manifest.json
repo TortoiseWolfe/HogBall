@@ -1,7 +1,7 @@
 {
-  "name": "hogball",
-  "short_name": "hogball",
-  "description": "hogball - Modern Next.js template with PWA, theming, and interactive components",
+  "name": "HogBall",
+  "short_name": "HogBall",
+  "description": "HogBall - Modern Next.js template with PWA, theming, and interactive components",
   "theme_color": "#2563eb",
   "background_color": "#1a1a1a",
   "display": "standalone",

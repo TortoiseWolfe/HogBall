@@ -608,4 +608,61 @@ If you want to restrict the key to only the PageSpeed API:
 
 ---
 
+## Appendix: Supabase Setup (Critical)
+
+### Issue 14: Monolithic Migration Missing auth.users INSERT
+
+**Problem:** The original migration inserted into `user_profiles` for the admin user without first creating the user in `auth.users`, causing foreign key violations.
+
+**Error:**
+
+```
+insert or update on table "user_profiles" violates foreign key constraint "user_profiles_id_fkey"
+DETAIL: Key (id)=(00000000-0000-0000-0000-000000000001) is not present in table "users".
+```
+
+**Fix Applied:** Added INSERT into `auth.users` BEFORE the `user_profiles` INSERT in the monolithic migration file.
+
+### Issue 15: Test User Passwords Cannot Use $ Character
+
+**Problem:** Passwords with `$` in `.env` are interpreted as shell variables by Docker Compose.
+
+**Error:**
+
+```
+The "qL2wRv" variable is not set. Defaulting to a blank string.
+```
+
+**Fix:** Use `@` or other special characters instead of `$` in passwords.
+
+### Issue 16: Supabase Dashboard Navigation Changed (2025)
+
+**Old paths don't work.** Use these:
+
+| What You Need             | Where to Find It                               |
+| ------------------------- | ---------------------------------------------- |
+| Project URL               | Settings → **Data API**                        |
+| Publishable Key (anon)    | Settings → **API Keys** → `sb_publishable_...` |
+| Secret Key (service role) | Settings → **API Keys** → `sb_secret_...`      |
+
+### Required GitHub Secrets for Deployment
+
+| Secret                          | Required | Source                         |
+| ------------------------------- | -------- | ------------------------------ |
+| `NEXT_PUBLIC_PAGESPEED_API_KEY` | Yes      | Google Cloud Console           |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase → Settings → Data API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase → Settings → API Keys |
+
+### Test Users Setup
+
+After running the migration, create test users:
+
+```bash
+docker compose exec hogball pnpm exec tsx scripts/seed-test-users.ts
+```
+
+Or manually via the script if admin already exists from migration.
+
+---
+
 _This feedback is provided to help improve the HogBall template for future users._

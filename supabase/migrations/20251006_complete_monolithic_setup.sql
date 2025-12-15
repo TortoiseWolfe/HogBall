@@ -1267,13 +1267,26 @@ COMMENT ON TABLE group_keys IS 'Encrypted symmetric group keys per member per ve
 --   ✅ Group chat policies: 8 policies (membership access, key distribution)
 --   ✅ Permissions: Authenticated users + service role (all tables)
 --   ✅ Test user: test@example.com (primary, email confirmed)
---   ✅ Admin user: scripthammer (Feature 002 - welcome messages)
+--   ✅ Admin user: hogball (Feature 002 - welcome messages)
 -- ============================================================================
 
--- Admin profile for system welcome messages (Feature 002)
+-- Admin auth user for system welcome messages (Feature 002)
 -- Fixed UUID: 00000000-0000-0000-0000-000000000001
+-- Must exist in auth.users before user_profiles (foreign key)
+INSERT INTO auth.users (
+  id, instance_id, email, encrypted_password,
+  email_confirmed_at, created_at, updated_at, role, aud
+) VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000000',
+  'admin@hogball.com',
+  crypt('AdminKeyNotUsed!Placeholder', gen_salt('bf')),
+  NOW(), NOW(), NOW(), 'authenticated', 'authenticated'
+);
+
+-- Admin profile for system welcome messages (Feature 002)
 INSERT INTO user_profiles (id, username, display_name, welcome_message_sent)
-VALUES ('00000000-0000-0000-0000-000000000001', 'scripthammer', 'ScriptHammer', TRUE)
+VALUES ('00000000-0000-0000-0000-000000000001', 'hogball', 'HogBall', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
