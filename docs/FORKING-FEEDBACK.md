@@ -310,9 +310,12 @@ Error: Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_U
 **Required Setup:**
 
 1. Create a Supabase project at https://supabase.com/dashboard
-2. Get credentials from **Settings > API**:
-   - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
-   - anon/public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+2. Get credentials:
+   - **Project URL**: Settings → Data API → `NEXT_PUBLIC_SUPABASE_URL`
+   - **API Key**: Settings → API Keys → use `sb_publishable_...` key (new format) for `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+   > **Note (2025)**: Supabase now uses `sb_publishable_...` keys instead of the old `eyJ...` JWT format. Both work, but the new format is recommended. Find it under "API Keys" → "Publishable key".
+
 3. Add as GitHub secrets at `https://github.com/<owner>/<repo>/settings/secrets/actions`
 
 **Suggested Fix:** Either:
