@@ -505,6 +505,12 @@ This section documents the experience of forking ScriptHammer to create HogBall.
    - Fresh clone doesn't have .env, only .env.example
    - Solution: `cp .env.example .env` and set UID/GID
 
+4. **Git remote changed from SSH to HTTPS**
+   - Script changed `git@github.com:Owner/Repo.git` → `https://github.com/Owner/repo.git`
+   - This breaks SSH key authentication - git asks for username/password on push
+   - Manual fix: `git remote set-url origin git@github.com:Owner/Repo.git`
+   - Recommendation: Script should detect current protocol and preserve it, or add `--preserve-ssh` flag
+
 ### Time Required
 
 | Task | Time |
@@ -525,6 +531,10 @@ This section documents the experience of forking ScriptHammer to create HogBall.
 3. **Check Footer.tsx** - Decide on attribution before committing
 4. **Create .env immediately** - Don't wait for Docker to complain
 5. **Expect contract test failures** - They need Supabase credentials
+6. **Fix git remote after rebrand** - Script changes SSH to HTTPS, restore with:
+   ```bash
+   git remote set-url origin git@github.com:YourUser/YourRepo.git
+   ```
 
 ### Files That Required Manual Attention
 
@@ -532,6 +542,7 @@ This section documents the experience of forking ScriptHammer to create HogBall.
 |------|-------|--------|
 | `src/components/Footer.tsx` | Attribution link changed | Restored ScriptHammer link |
 | `.env` | Missing | Created from .env.example |
+| `.git/config` (remote) | SSH changed to HTTPS | `git remote set-url origin git@github.com:...` |
 | `docs/FORKING-FEEDBACK.md` | Needs fork-specific section | Added this section |
 
 ---
