@@ -32,9 +32,10 @@ jobs:
       # Wait for deployment to be ready
       - name: Wait for deployment
         run: |
-          echo "Waiting for deployment to be ready..."
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "Waiting for deployment at $SITE_URL..."
           for i in {1..30}; do
-            if curl -s -o /dev/null -w "%{http_code}" https://hogball.com/ | grep -q "200"; then
+            if curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/" | grep -q "200"; then
               echo "Site is ready!"
               break
             fi
@@ -49,9 +50,9 @@ jobs:
         continue-on-error: true
         with:
           urls: |
-            https://hogball.com
-            https://hogball.com/status
-            https://hogball.com/components
+            https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+            https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/status
+            https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/components
           uploadArtifacts: true
           temporaryPublicStorage: true
           runs: 3
@@ -81,7 +82,7 @@ jobs:
             "seo": ${{ steps.lighthouse.outputs.seo || 0 }},
             "pwa": ${{ steps.lighthouse.outputs.pwa || 0 }},
             "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-            "url": "https://hogball.com/",
+            "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/",
             "source": "github-actions"
           }
           EOF
@@ -157,10 +158,12 @@ jobs:
 
   deployment-check:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
     steps:
       - name: Check Main Site
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://hogball.com/)
+          response=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/")
           if [ "$response" = "200" ]; then
             echo "✅ Main site is up (HTTP $response)"
           else
@@ -169,7 +172,7 @@ jobs:
 
       - name: Check Storybook
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://hogball.com/storybook/)
+          response=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/storybook/")
           if [ "$response" = "200" ]; then
             echo "✅ Storybook is up (HTTP $response)"
           else
@@ -178,7 +181,7 @@ jobs:
 
       - name: Check Status Page
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://hogball.com/status/)
+          response=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/status/")
           if [ "$response" = "200" ]; then
             echo "✅ Status page is up (HTTP $response)"
           else
@@ -189,6 +192,8 @@ jobs:
     needs: [lighthouse, pwa-tests, deployment-check]
     runs-on: ubuntu-latest
     if: always()
+    env:
+      SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -198,9 +203,9 @@ jobs:
           if [ "${{ needs.lighthouse.result }}" = "success" ] && \
              [ "${{ needs.pwa-tests.result }}" = "success" ] && \
              [ "${{ needs.deployment-check.result }}" = "success" ]; then
-            echo "[![Status](https://img.shields.io/badge/Status-Operational-success)](https://hogball.com/status/)" > status.md
+            echo "[![Status](https://img.shields.io/badge/Status-Operational-success)]($SITE_URL/status/)" > status.md
           else
-            echo "[![Status](https://img.shields.io/badge/Status-Issues_Detected-warning)](https://hogball.com/status/)" > status.md
+            echo "[![Status](https://img.shields.io/badge/Status-Issues_Detected-warning)]($SITE_URL/status/)" > status.md
           fi
           echo "Last checked: $(date)" >> status.md
 

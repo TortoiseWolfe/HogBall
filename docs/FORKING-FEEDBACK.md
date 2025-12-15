@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), and **the PWA manifest description is generated at build time** (Issue #13).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), and **monitor workflow has hardcoded domain URLs** (Issue #18).
 
 ---
 
@@ -645,6 +645,28 @@ The "qL2wRv" variable is not set. Defaulting to a blank string.
 | Publishable Key (anon)    | Settings → **API Keys** → `sb_publishable_...` |
 | Secret Key (service role) | Settings → **API Keys** → `sb_secret_...`      |
 
+### Issue 17: GitHub Actions CI Requires Test User Secrets
+
+**Problem:** After adding the basic Supabase secrets, CI still fails with `Invalid login credentials`. The contract and integration tests try to sign in with test users that don't have matching secrets configured.
+
+**Error:**
+
+```
+FAIL  tests/contract/auth/sign-in.contract.test.ts > Supabase Auth Sign-In Contract > should accept valid credentials
+AssertionError: expected AuthApiError: Invalid login credentials { …(3) } to be null
+```
+
+**Root Cause:** The test fixtures in `tests/fixtures/test-user.ts` fall back to `test@example.com` when `TEST_USER_PRIMARY_EMAIL` isn't set:
+
+```typescript
+export const TEST_EMAIL =
+  process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com';
+```
+
+GitHub Actions doesn't have this secret, so tests use the fallback email which doesn't exist in Supabase.
+
+**Fix:** Add all test user secrets to GitHub Actions, not just the password.
+
 ### Required GitHub Secrets for Deployment
 
 | Secret                          | Required | Source                         |
@@ -652,6 +674,48 @@ The "qL2wRv" variable is not set. Defaulting to a blank string.
 | `NEXT_PUBLIC_PAGESPEED_API_KEY` | Yes      | Google Cloud Console           |
 | `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | Supabase → Settings → Data API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | Supabase → Settings → API Keys |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | Supabase → Settings → API Keys |
+| `TEST_USER_PRIMARY_EMAIL`       | Yes      | Your `.env` file               |
+| `TEST_USER_PRIMARY_PASSWORD`    | Yes      | Your `.env` file               |
+
+**Why 6 secrets instead of 3?**
+
+- **Basic 3**: URL, anon key, PageSpeed - needed for build and deploy
+- **Service role key**: Needed by contract tests to bypass RLS
+- **Test user email/password**: Needed by contract tests to authenticate
+
+Without all 6, the CI workflow will fail even though Deploy might succeed.
+
+### Issue 18: Monitor Workflow Has Hardcoded Domain URL
+
+**Problem:** The `monitor.yml` workflow has hardcoded `https://hogball.com/` URLs which don't exist for forks using GitHub Pages default URL.
+
+**Error:**
+
+```
+Error: Process completed with exit code 60.
+```
+
+**Root Cause:** Exit code 60 from curl means the URL couldn't be resolved/reached. The monitor workflow was checking:
+
+- `https://hogball.com/`
+- `https://hogball.com/storybook/`
+- `https://hogball.com/status/`
+
+But forks deploy to `https://<username>.github.io/<repo>/`.
+
+**Fix Applied:** Updated `monitor.yml` to use dynamic URLs:
+
+```yaml
+env:
+  SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+```
+
+**Files Updated:**
+
+- `.github/workflows/monitor.yml` - All hardcoded `hogball.com` references replaced with dynamic `github.io` URLs
+
+**Note for Template Maintainers:** Consider whether the rebrand script should also update workflow files, or use a configurable `SITE_URL` secret.
 
 ### Test Users Setup
 
