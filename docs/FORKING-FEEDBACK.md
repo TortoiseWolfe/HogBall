@@ -513,16 +513,16 @@ This section documents the experience of forking ScriptHammer to create HogBall.
 
 ### Time Required
 
-| Task | Time |
-|------|------|
-| Dry-run preview | 2 seconds |
-| Execute rebrand | 2 seconds |
-| Manual Footer fix | 1 minute |
-| Docker rebuild | 2 minutes |
-| Build verification | 30 seconds |
-| Test run | 22 seconds |
-| Documentation updates | 10 minutes |
-| **Total** | **~15 minutes** |
+| Task                  | Time            |
+| --------------------- | --------------- |
+| Dry-run preview       | 2 seconds       |
+| Execute rebrand       | 2 seconds       |
+| Manual Footer fix     | 1 minute        |
+| Docker rebuild        | 2 minutes       |
+| Build verification    | 30 seconds      |
+| Test run              | 22 seconds      |
+| Documentation updates | 10 minutes      |
+| **Total**             | **~15 minutes** |
 
 ### Recommendations for Future Forks
 
@@ -538,12 +538,12 @@ This section documents the experience of forking ScriptHammer to create HogBall.
 
 ### Files That Required Manual Attention
 
-| File | Issue | Action |
-|------|-------|--------|
-| `src/components/Footer.tsx` | Attribution link changed | Restored ScriptHammer link |
-| `.env` | Missing | Created from .env.example |
-| `.git/config` (remote) | SSH changed to HTTPS | `git remote set-url origin git@github.com:...` |
-| `docs/FORKING-FEEDBACK.md` | Needs fork-specific section | Added this section |
+| File                        | Issue                       | Action                                         |
+| --------------------------- | --------------------------- | ---------------------------------------------- |
+| `src/components/Footer.tsx` | Attribution link changed    | Restored ScriptHammer link                     |
+| `.env`                      | Missing                     | Created from .env.example                      |
+| `.git/config` (remote)      | SSH changed to HTTPS        | `git remote set-url origin git@github.com:...` |
+| `docs/FORKING-FEEDBACK.md`  | Needs fork-specific section | Added this section                             |
 
 ---
 
@@ -552,35 +552,53 @@ This section documents the experience of forking ScriptHammer to create HogBall.
 The deploy workflow requires `NEXT_PUBLIC_PAGESPEED_API_KEY`. Here's how to create one:
 
 ### 1. Create Google Cloud Project
+
 - Go to: https://console.cloud.google.com/apis/credentials
 - Click "Select a project" → "New Project"
 - Name: `YourProject-PageSpeed` → Create
 
 ### 2. Enable PageSpeed API
+
 - Go to: https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com
 - Click **"Enable"**
 
 ### 3. Create API Key
+
 - Go to: https://console.cloud.google.com/apis/credentials
 - Click **"+ CREATE CREDENTIALS"** → **"API key"**
 
-### 4. Configure Key (Recommended Settings)
+### 4. Configure Key
 
-| Field | Value | Notes |
-|-------|-------|-------|
-| Name | `YourProject-PageSpeed` | Descriptive name |
-| Service account | ❌ Unchecked | Not needed |
-| Application restrictions | **Websites** | Security best practice |
-| Website restrictions | `https://yourusername.github.io/*` | Your GitHub Pages domain |
-| API restrictions | **Restrict key** → Select "PageSpeed Insights API" | Limits key to only this API |
+| Field                    | Value                                         | Notes                      |
+| ------------------------ | --------------------------------------------- | -------------------------- |
+| Name                     | `YourProject-PageSpeed`                       | Descriptive name           |
+| Service account          | ❌ Unchecked                                  | Not needed                 |
+| Application restrictions | **Websites**                                  | Security best practice     |
+| Website restrictions     | `https://yourusername.github.io/*`            | Your GitHub Pages domain   |
+| API restrictions         | **Don't restrict key** (easiest) OR see below | Can add restrictions later |
+
+**Optional: Restricting to PageSpeed API only**
+
+If you want to restrict the key to only the PageSpeed API:
+
+1. Select "Restrict key" under API restrictions
+2. In the dropdown, search/filter for "PageSpeed"
+3. The API may appear as:
+   - "PageSpeed Insights API"
+   - "pagespeedonline.googleapis.com" (internal service name)
+4. If not found: Ensure you enabled the API first (Step 2), then refresh the page
+
+**Note**: The API must be enabled on YOUR project before it appears in the dropdown. Even if enabled for another project, each Google Cloud project needs its own enablement.
 
 ### 5. Add to GitHub Secrets
+
 - Go to: `https://github.com/YourUser/YourRepo/settings/secrets/actions`
 - Click **"New repository secret"**
 - Name: `NEXT_PUBLIC_PAGESPEED_API_KEY`
 - Value: paste your API key (starts with `AIzaSy...`)
 
 ### Why These Settings?
+
 - **Website restriction**: Prevents key abuse if exposed in client-side code
 - **API restriction**: Key can only call PageSpeed API, nothing else
 - **No service account**: Simpler setup, sufficient for this use case
