@@ -3,9 +3,9 @@ import { Metadata } from 'next';
 import { CookieActions } from '@/components/privacy/CookieActions';
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy - ScriptHammer',
+  title: 'Cookie Policy - HogBall',
   description:
-    'Learn how ScriptHammer uses cookies and how you can manage your cookie preferences.',
+    'Learn how HogBall uses cookies and how you can manage your cookie preferences.',
 };
 
 export default function CookiePolicyPage() {

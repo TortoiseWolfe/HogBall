@@ -21,7 +21,7 @@ const STORAGE_KEY = 'supabase_setup_banner_dismissed';
  */
 export function SetupBanner({
   message = 'Supabase is not configured. Some features may be unavailable.',
-  docsUrl = 'https://github.com/TortoiseWolfe/ScriptHammer#supabase-setup',
+  docsUrl = 'https://github.com/TortoiseWolfe/HogBall#supabase-setup',
   show,
 }: SetupBannerProps) {
   const [isDismissed, setIsDismissed] = useState(true); // Start hidden to avoid flash

@@ -98,10 +98,10 @@ docker compose down
 docker compose up
 
 # Check container logs
-docker compose logs -f scripthammer
+docker compose logs -f hogball
 
 # Enter container
-docker compose exec scripthammer sh
+docker compose exec hogball sh
 ```
 
 ## When to Use Docker vs Local

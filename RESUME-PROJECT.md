@@ -1,8 +1,8 @@
-# ScriptHammer - Resume Project Entry
+# HogBall - Resume Project Entry
 
 ## Non-Technical (Recruiter-Friendly)
 
-**ScriptHammer** | [github.com/TortoiseWolfe/ScriptHammer](https://github.com/TortoiseWolfe/ScriptHammer)
+**HogBall** | [github.com/TortoiseWolfe/HogBall](https://github.com/TortoiseWolfe/HogBall)
 
 Open-source web application template that helps development teams launch secure, accessible products faster by providing pre-built authentication, messaging, and payment features.
 
@@ -12,7 +12,7 @@ Reduced project setup time from weeks to hours while ensuring accessibility comp
 
 ## Non-Technical Alternative
 
-**ScriptHammer** | [github.com/TortoiseWolfe/ScriptHammer](https://github.com/TortoiseWolfe/ScriptHammer)
+**HogBall** | [github.com/TortoiseWolfe/HogBall](https://github.com/TortoiseWolfe/HogBall)
 
 Web application starter kit enabling teams to ship accessible, secure products faster with built-in user authentication, real-time messaging, and payment processing.
 
@@ -22,7 +22,7 @@ Designed for startups and agencies needing production-ready foundations; include
 
 ## Technical (Developer-Focused)
 
-**ScriptHammer** | [github.com/TortoiseWolfe/ScriptHammer](https://github.com/TortoiseWolfe/ScriptHammer)
+**HogBall** | [github.com/TortoiseWolfe/HogBall](https://github.com/TortoiseWolfe/HogBall)
 
 Production-ready Next.js starter template with real-time encrypted messaging, OAuth authentication, and WCAG 2.1 AA accessibility compliance.
 
@@ -32,7 +32,7 @@ Built full-stack features including group chat with ECDH encryption, Stripe/PayP
 
 ## Technical Short
 
-**ScriptHammer** | [github.com/TortoiseWolfe/ScriptHammer](https://github.com/TortoiseWolfe/ScriptHammer)
+**HogBall** | [github.com/TortoiseWolfe/HogBall](https://github.com/TortoiseWolfe/HogBall)
 
 Full-stack Next.js 15 template with encrypted real-time messaging, payments, and comprehensive testing (793+ tests).
 

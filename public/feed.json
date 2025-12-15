@@ -1,8 +1,8 @@
 {
   "version": "https://jsonfeed.org/version/1.1",
-  "title": "ScriptHammer Blog",
-  "home_page_url": "https://tortoisewolfe.github.io/ScriptHammer/blog",
-  "feed_url": "https://tortoisewolfe.github.io/ScriptHammer/feed.json",
+  "title": "HogBall Blog",
+  "home_page_url": "https://tortoisewolfe.github.io/HogBall/blog",
+  "feed_url": "https://tortoisewolfe.github.io/HogBall/feed.json",
   "description": "Opinionated Next.js PWA Template",
   "items": []
 }

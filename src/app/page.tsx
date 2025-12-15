@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LayeredScriptHammerLogo } from '@/components/atomic/SpinningLogo';
+import { LayeredHogBallLogo } from '@/components/atomic/SpinningLogo';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
 import { detectedConfig } from '@/config/project-detected';
 import { useEffect } from 'react';
@@ -48,7 +48,7 @@ export default function Home() {
             {/* Logo - responsive sizes */}
             <div className="flex-shrink-0">
               <div className="h-48 w-48 sm:h-52 sm:w-52 md:h-56 md:w-56 lg:h-[350px] lg:w-[350px]">
-                <LayeredScriptHammerLogo speed="slow" pauseOnHover />
+                <LayeredHogBallLogo speed="slow" pauseOnHover />
               </div>
             </div>
 
@@ -136,7 +136,7 @@ export default function Home() {
                   Read Blog
                 </Link>
                 <a
-                  href="https://tortoisewolfe.github.io/ScriptHammer/storybook/"
+                  href="https://tortoisewolfe.github.io/HogBall/storybook/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-primary btn-md group md:btn-lg min-h-11 w-full min-w-11 sm:w-auto"
@@ -273,7 +273,7 @@ export default function Home() {
                   •
                 </span>
                 <a
-                  href="https://github.com/TortoiseWolfe/ScriptHammer/fork"
+                  href="https://github.com/TortoiseWolfe/HogBall/fork"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="link link-hover opacity-87 hover:opacity-100 focus:opacity-100"

@@ -1,12 +1,12 @@
-# Forking ScriptHammer
+# Forking HogBall
 
-Complete guide to creating your own project from the ScriptHammer template.
+Complete guide to creating your own project from the HogBall template.
 
 ## Quick Start (5 Minutes)
 
 ```bash
 # 1. Fork and clone
-gh repo fork TortoiseWolfe/ScriptHammer --clone
+gh repo fork TortoiseWolfe/HogBall --clone
 cd YourProjectName
 
 # 2. Run the rebrand script
@@ -37,8 +37,8 @@ The `scripts/rebrand.sh` script automates updating 200+ files:
 
 | Category    | Changes                                                                                                |
 | ----------- | ------------------------------------------------------------------------------------------------------ |
-| **Code**    | Replaces "ScriptHammer" with your project name in all TypeScript, JavaScript, JSON, and Markdown files |
-| **Files**   | Renames files containing "ScriptHammer" (e.g., `ScriptHammerLogo.tsx` → `MyProjectLogo.tsx`)           |
+| **Code**    | Replaces "HogBall" with your project name in all TypeScript, JavaScript, JSON, and Markdown files |
+| **Files**   | Renames files containing "HogBall" (e.g., `HogBallLogo.tsx` → `MyProjectLogo.tsx`)           |
 | **Docker**  | Updates service name in `docker-compose.yml`                                                           |
 | **Git**     | Updates remote origin URL to your repository                                                           |
 | **Config**  | Updates `package.json` name, description, and repository fields                                        |
@@ -152,7 +152,7 @@ After forking, verify everything works:
 - [ ] `docker compose up` starts without errors
 - [ ] `docker compose exec <project> pnpm test` - all tests pass
 - [ ] `docker compose exec <project> pnpm run build` - build succeeds
-- [ ] No "ScriptHammer" references in `package.json`
+- [ ] No "HogBall" references in `package.json`
 - [ ] `git remote -v` shows your repository URL
 - [ ] GitHub Pages deployment succeeds (if enabled)
 - [ ] Site loads at `https://username.github.io/project-name/`
@@ -169,7 +169,7 @@ Tests should pass without Supabase environment variables thanks to comprehensive
 ### Build Fails After Rebrand
 
 1. Run `docker compose down && docker compose up --build` to rebuild
-2. Check for any remaining "ScriptHammer" references: `grep -r "ScriptHammer" src/`
+2. Check for any remaining "HogBall" references: `grep -r "HogBall" src/`
 3. Ensure all import paths are correct after file renames
 
 ### GitHub Pages Shows 404
@@ -193,5 +193,5 @@ docker compose exec <project> rm -rf node_modules
 
 ## Getting Help
 
-- **GitHub Issues**: [ScriptHammer Issues](https://github.com/TortoiseWolfe/ScriptHammer/issues)
+- **GitHub Issues**: [HogBall Issues](https://github.com/TortoiseWolfe/HogBall/issues)
 - **Documentation**: [CLAUDE.md](../CLAUDE.md) for comprehensive development guide

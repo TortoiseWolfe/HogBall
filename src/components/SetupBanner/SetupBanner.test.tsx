@@ -61,7 +61,7 @@ describe('SetupBanner', () => {
       const link = screen.getByText('View setup guide');
       expect(link).toHaveAttribute(
         'href',
-        'https://github.com/TortoiseWolfe/ScriptHammer#supabase-setup'
+        'https://github.com/TortoiseWolfe/HogBall#supabase-setup'
       );
     });
 

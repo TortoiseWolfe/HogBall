@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-# Docker entrypoint for ScriptHammer
+# Docker entrypoint for HogBall
 # Handles .next directory permissions to prevent Docker/host conflicts
 
-echo "🚀 Initializing ScriptHammer container..."
+echo "🚀 Initializing HogBall container..."
 
 # Always ensure dependencies are up-to-date with package.json FIRST (as root)
 # This is fast when dependencies are already installed but catches any new ones

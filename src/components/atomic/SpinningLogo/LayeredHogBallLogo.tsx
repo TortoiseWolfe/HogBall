@@ -5,15 +5,15 @@ import Image from 'next/image';
 import { SpinningLogo } from './SpinningLogo';
 import { detectedConfig } from '@/config/project-detected';
 
-export interface LayeredScriptHammerLogoProps {
+export interface LayeredHogBallLogoProps {
   className?: string;
   size?: number;
   speed?: 'slow' | 'normal' | 'fast' | number;
   pauseOnHover?: boolean;
 }
 
-export const LayeredScriptHammerLogo: React.FC<
-  LayeredScriptHammerLogoProps
+export const LayeredHogBallLogo: React.FC<
+  LayeredHogBallLogoProps
 > = ({ className = '', speed = 'slow', pauseOnHover = true }) => {
   return (
     <div
@@ -27,7 +27,7 @@ export const LayeredScriptHammerLogo: React.FC<
       {/* Rotating gear ring with hammer */}
       <SpinningLogo speed={speed} pauseOnHover={pauseOnHover}>
         <Image
-          src={`${detectedConfig.basePath}/scripthammer-logo.svg`}
+          src={`${detectedConfig.basePath}/hogball-logo.svg`}
           alt="Gear Ring"
           width={400}
           height={400}
@@ -100,4 +100,4 @@ export const LayeredScriptHammerLogo: React.FC<
   );
 };
 
-LayeredScriptHammerLogo.displayName = 'LayeredScriptHammerLogo';
+LayeredHogBallLogo.displayName = 'LayeredHogBallLogo';

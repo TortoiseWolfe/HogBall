@@ -659,7 +659,7 @@ ChatWindow (Organism)
 
 **Frontend**:
 
-- React 19.1.0 (already in ScriptHammer)
+- React 19.1.0 (already in HogBall)
 - TypeScript (strict mode)
 - Tailwind CSS 4 + DaisyUI (44px touch targets)
 - Dexie.js (IndexedDB wrapper) - **NEW dependency**
@@ -673,9 +673,9 @@ ChatWindow (Organism)
 
 **Testing**:
 
-- Vitest (unit tests) - already in ScriptHammer
-- Playwright (E2E tests) - already in ScriptHammer
-- Pa11y (accessibility) - already in ScriptHammer
+- Vitest (unit tests) - already in HogBall
+- Playwright (E2E tests) - already in HogBall
+- Pa11y (accessibility) - already in HogBall
 
 **New Dependencies**:
 

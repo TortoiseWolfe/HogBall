@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { SpinningLogo } from './SpinningLogo';
-import { ScriptHammerLogo } from './ScriptHammerLogo';
-import { LayeredScriptHammerLogo } from './LayeredScriptHammerLogo';
+import { HogBallLogo } from './HogBallLogo';
+import { LayeredHogBallLogo } from './LayeredHogBallLogo';
 
 const meta = {
   title: 'Atomic Design/Atomic/SpinningLogo',
@@ -42,81 +42,81 @@ const ReactLogo = () => (
   </svg>
 );
 
-// Layered ScriptHammer Logo as the primary/default story
+// Layered HogBall Logo as the primary/default story
 export const Default: Story = {
   args: {
     children: null,
   },
   render: () => (
-    <LayeredScriptHammerLogo size={250} speed="slow" pauseOnHover={true} />
+    <LayeredHogBallLogo size={250} speed="slow" pauseOnHover={true} />
   ),
 };
 
-// Original simple ScriptHammer Logo
-export const SimpleScriptHammer: Story = {
+// Original simple HogBall Logo
+export const SimpleHogBall: Story = {
   args: {
-    children: <ScriptHammerLogo />,
+    children: <HogBallLogo />,
     size: 250,
     pauseOnHover: true,
   },
 };
 
-// Layered ScriptHammer Logo - the new composite logo
-export const LayeredScriptHammer: Story = {
+// Layered HogBall Logo - the new composite logo
+export const LayeredHogBall: Story = {
   args: {
     children: null,
   },
   render: () => (
-    <LayeredScriptHammerLogo size={250} speed="slow" pauseOnHover={true} />
+    <LayeredHogBallLogo size={250} speed="slow" pauseOnHover={true} />
   ),
 };
 
-export const LayeredScriptHammerLarge: Story = {
+export const LayeredHogBallLarge: Story = {
   args: {
     children: null,
   },
   render: () => (
-    <LayeredScriptHammerLogo size={350} speed="slow" pauseOnHover={true} />
+    <LayeredHogBallLogo size={350} speed="slow" pauseOnHover={true} />
   ),
 };
 
-export const ScriptHammerLarge: Story = {
+export const HogBallLarge: Story = {
   args: {
-    children: <ScriptHammerLogo />,
+    children: <HogBallLogo />,
     size: 350,
     pauseOnHover: true,
   },
 };
 
-export const ScriptHammerFast: Story = {
+export const HogBallFast: Story = {
   args: {
-    children: <ScriptHammerLogo />,
+    children: <HogBallLogo />,
     size: 250,
     speed: 'fast',
     pauseOnHover: true,
   },
 };
 
-export const ScriptHammerVerySlow: Story = {
+export const HogBallVerySlow: Story = {
   args: {
-    children: <ScriptHammerLogo />,
+    children: <HogBallLogo />,
     size: 250,
     speed: 60, // 60 second rotation - ultra smooth
     pauseOnHover: true,
   },
 };
 
-export const ScriptHammerStatic: Story = {
+export const HogBallStatic: Story = {
   args: {
-    children: <ScriptHammerLogo />,
+    children: <HogBallLogo />,
     size: 250,
     isSpinning: false,
   },
 };
 
-export const ScriptHammerCounterClockwise: Story = {
+export const HogBallCounterClockwise: Story = {
   args: {
-    children: <ScriptHammerLogo />,
+    children: <HogBallLogo />,
     size: 250,
     direction: 'counter-clockwise',
     pauseOnHover: true,

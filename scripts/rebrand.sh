@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # =============================================================================
-# ScriptHammer Rebrand Script
+# HogBall Rebrand Script
 # =============================================================================
-# Automates rebranding of the ScriptHammer template to a new project identity.
+# Automates rebranding of the HogBall template to a new project identity.
 # Updates 200+ files including code, config, and documentation.
 #
 # Usage: ./scripts/rebrand.sh <PROJECT_NAME> <OWNER> "<DESCRIPTION>" [OPTIONS]
@@ -56,8 +56,8 @@ FORCE=false
 KEEP_CNAME=false
 
 # Original project name to search for
-ORIGINAL_NAME="ScriptHammer"
-ORIGINAL_NAME_LOWER="scripthammer"
+ORIGINAL_NAME="HogBall"
+ORIGINAL_NAME_LOWER="hogball"
 ORIGINAL_OWNER="TortoiseWolfe"
 
 # =============================================================================
@@ -146,7 +146,7 @@ check_uncommitted_changes() {
     fi
 }
 
-# Count ScriptHammer references to detect if already rebranded
+# Count HogBall references to detect if already rebranded
 count_references() {
     local count
     count=$(grep -r "$ORIGINAL_NAME" --include="*.ts" --include="*.tsx" --include="*.js" \
@@ -305,11 +305,11 @@ delete_cname() {
     local cname_file="$REPO_ROOT/public/CNAME"
 
     if [ -f "$cname_file" ]; then
-        # Check if it's a custom domain (not scripthammer.com)
+        # Check if it's a custom domain (not hogball.com)
         local domain
         domain=$(cat "$cname_file" 2>/dev/null || echo "")
 
-        if [[ "$domain" == *"scripthammer"* ]] || [ -z "$domain" ]; then
+        if [[ "$domain" == *"hogball"* ]] || [ -z "$domain" ]; then
             if [ "$KEEP_CNAME" = true ]; then
                 log_info "Keeping CNAME file (--keep-cname flag set)"
             else
@@ -418,7 +418,7 @@ main() {
     # Header
     echo ""
     echo "========================================="
-    echo "  ScriptHammer Rebrand Script v${VERSION}"
+    echo "  HogBall Rebrand Script v${VERSION}"
     echo "========================================="
     echo ""
 

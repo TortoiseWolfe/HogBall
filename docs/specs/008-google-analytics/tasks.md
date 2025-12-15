@@ -134,7 +134,7 @@ touch src/hooks/useAnalytics.ts
 
 ```bash
 # Use component generator
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec hogball pnpm run generate:component
 # Select: atomic
 # Name: GoogleAnalytics
 # Path: analytics/GoogleAnalytics
