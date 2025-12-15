@@ -547,4 +547,44 @@ This section documents the experience of forking ScriptHammer to create HogBall.
 
 ---
 
+## Appendix: Google PageSpeed API Key Setup
+
+The deploy workflow requires `NEXT_PUBLIC_PAGESPEED_API_KEY`. Here's how to create one:
+
+### 1. Create Google Cloud Project
+- Go to: https://console.cloud.google.com/apis/credentials
+- Click "Select a project" → "New Project"
+- Name: `YourProject-PageSpeed` → Create
+
+### 2. Enable PageSpeed API
+- Go to: https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com
+- Click **"Enable"**
+
+### 3. Create API Key
+- Go to: https://console.cloud.google.com/apis/credentials
+- Click **"+ CREATE CREDENTIALS"** → **"API key"**
+
+### 4. Configure Key (Recommended Settings)
+
+| Field | Value | Notes |
+|-------|-------|-------|
+| Name | `YourProject-PageSpeed` | Descriptive name |
+| Service account | ❌ Unchecked | Not needed |
+| Application restrictions | **Websites** | Security best practice |
+| Website restrictions | `https://yourusername.github.io/*` | Your GitHub Pages domain |
+| API restrictions | **Restrict key** → Select "PageSpeed Insights API" | Limits key to only this API |
+
+### 5. Add to GitHub Secrets
+- Go to: `https://github.com/YourUser/YourRepo/settings/secrets/actions`
+- Click **"New repository secret"**
+- Name: `NEXT_PUBLIC_PAGESPEED_API_KEY`
+- Value: paste your API key (starts with `AIzaSy...`)
+
+### Why These Settings?
+- **Website restriction**: Prevents key abuse if exposed in client-side code
+- **API restriction**: Key can only call PageSpeed API, nothing else
+- **No service account**: Simpler setup, sufficient for this use case
+
+---
+
 _This feedback is provided to help improve the HogBall template for future users._
