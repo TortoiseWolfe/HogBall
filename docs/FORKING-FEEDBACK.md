@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28), and **Supabase validates email domain MX records** (Issue #29), and **E2E tests don't dismiss cookie consent banner** (Issue #30).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28), and **Supabase validates email domain MX records** (Issue #29), **E2E tests don't dismiss cookie consent banner** (Issue #30), and **E2E Password field selector ambiguity** (Issue #31).
 
 ---
 
@@ -1130,6 +1130,37 @@ But other test files (`session-persistence.spec.ts`, `rate-limiting.spec.ts`, `p
 1. Add cookie handling to E2E test global setup or fixtures
 2. Or document that all E2E tests must dismiss the banner before interactions
 3. Consider auto-accepting cookies in test environment via environment variable
+
+### Issue 31: E2E Password Field Selector Ambiguity
+
+**Problem:** E2E tests fail to fill password fields because `getByLabel('Password')` matches both "Password" and "Confirm Password" fields.
+
+**Symptom:** Tests show email filled correctly but password fields remain empty. Tests hang on sign-up pages because form submission fails validation.
+
+**Root Cause:** The sign-up form has two password-related labels:
+
+- "Password"
+- "Confirm Password"
+
+Without `{ exact: true }`, Playwright's `getByLabel('Password')` can match "Confirm Password" since it contains "Password". The `sign-up.spec.ts` file correctly uses:
+
+```typescript
+await page.getByLabel('Password', { exact: true }).fill(password);
+```
+
+But other test files (`session-persistence.spec.ts`, `protected-routes.spec.ts`, `user-registration.spec.ts`) used:
+
+```typescript
+await page.getByLabel('Password').fill(password); // Ambiguous!
+```
+
+**Fix Applied:** Added `{ exact: true }` to all Password label selectors in E2E tests:
+
+- `tests/e2e/auth/session-persistence.spec.ts`
+- `tests/e2e/auth/protected-routes.spec.ts`
+- `tests/e2e/auth/user-registration.spec.ts`
+
+**Lesson:** When forms have multiple similar labels (Password/Confirm Password, Email/Confirm Email), always use `{ exact: true }` with `getByLabel()` to avoid ambiguity.
 
 ### Test Users Setup
 

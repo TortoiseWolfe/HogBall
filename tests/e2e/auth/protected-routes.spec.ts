@@ -42,7 +42,7 @@ test.describe('Protected Routes E2E', () => {
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
 
@@ -75,7 +75,7 @@ test.describe('Protected Routes E2E', () => {
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(user1Email);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
     await page.waitForURL(/\/(verify-email|profile)/);
@@ -92,7 +92,7 @@ test.describe('Protected Routes E2E', () => {
     const user2Email = `hogballtest+rls2-${Date.now()}@gmail.com`;
     await page.goto('/sign-up');
     await page.getByLabel('Email').fill(user2Email);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
     await page.waitForURL(/\/(verify-email|profile)/);
@@ -113,7 +113,7 @@ test.describe('Protected Routes E2E', () => {
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
 
@@ -137,7 +137,7 @@ test.describe('Protected Routes E2E', () => {
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
     await page.waitForURL(/\/(verify-email|profile)/);
@@ -162,7 +162,7 @@ test.describe('Protected Routes E2E', () => {
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
     await page.waitForURL(/\/(verify-email|profile)/);
@@ -192,7 +192,7 @@ test.describe('Protected Routes E2E', () => {
 
     // Sign in
     await page.getByLabel('Email').fill(testEmail);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByRole('button', { name: 'Sign In' }).click();
 
     // Note: If redirect-after-auth is implemented, should redirect to /account
@@ -217,7 +217,7 @@ test.describe('Protected Routes E2E', () => {
     await page
       .getByLabel('Email')
       .fill(`hogballtest+delete-${Date.now()}@gmail.com`);
-    await page.getByLabel('Password').fill(testPassword);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
     await page.waitForURL(/\/(verify-email|profile)/);
