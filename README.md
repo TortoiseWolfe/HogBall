@@ -176,11 +176,18 @@ SUPABASE_PROJECT_REF
 SUPABASE_SERVICE_ROLE_KEY
 ```
 
-### Testing
+### Testing (Required for CI/E2E)
 
 ```
+TEST_USER_PRIMARY_EMAIL
 TEST_USER_PRIMARY_PASSWORD
+TEST_USER_SECONDARY_EMAIL
+TEST_USER_SECONDARY_PASSWORD
+TEST_USER_TERTIARY_EMAIL
+TEST_USER_TERTIARY_PASSWORD
 ```
+
+> **Note:** Create 3 test users in Supabase Authentication → Users before adding these secrets. Multi-user E2E tests (friend requests, messaging) require all 3 accounts.
 
 ## 🍴 Forking This Template
 
