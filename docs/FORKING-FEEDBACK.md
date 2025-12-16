@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), and **E2E serve command uses SPA mode breaking static routes** (Issue #23).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), and **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24).
 
 ---
 
@@ -849,6 +849,49 @@ npx serve out -l 3000 &
 - `playwright.config.ts`
 
 **Lesson:** When serving Next.js static exports (`output: 'export'`), do NOT use SPA mode flags. Each route has its own `index.html` file that needs to be served directly.
+
+### Issue 24: E2E Workflow Missing 5 Critical Secrets (30-minute Timeout)
+
+**Problem:** E2E workflow times out after 30 minutes because tests hang waiting for missing environment variables.
+
+**Root Cause:** The e2e.yml workflow only passed 4 secrets to the test runner, but E2E tests require 9:
+
+```typescript
+// Tests use these env vars:
+process.env.SUPABASE_SERVICE_ROLE_KEY; // Admin cleanup
+process.env.TEST_USER_SECONDARY_EMAIL; // Multi-user tests
+process.env.TEST_USER_SECONDARY_PASSWORD;
+process.env.TEST_USER_TERTIARY_EMAIL; // Friend request tests
+process.env.TEST_USER_TERTIARY_PASSWORD;
+```
+
+**Fix Applied:** Added all 5 missing secrets to e2e.yml test step.
+
+### COMPLETE GitHub Secrets Required for E2E
+
+| Secret                          | Purpose               | Source                                   |
+| ------------------------------- | --------------------- | ---------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL  | Supabase Dashboard → Settings → Data API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public API key        | Supabase Dashboard → Settings → API Keys |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Admin operations      | Supabase Dashboard → Settings → API Keys |
+| `TEST_USER_PRIMARY_EMAIL`       | Primary test user     | Your `.env` file                         |
+| `TEST_USER_PRIMARY_PASSWORD`    | Primary test password | Your `.env` file                         |
+| `TEST_USER_SECONDARY_EMAIL`     | Secondary test user   | Create in Supabase Auth                  |
+| `TEST_USER_SECONDARY_PASSWORD`  | Secondary password    | Set when creating user                   |
+| `TEST_USER_TERTIARY_EMAIL`      | Third test user       | Create in Supabase Auth                  |
+| `TEST_USER_TERTIARY_PASSWORD`   | Third password        | Set when creating user                   |
+
+**Creating Test Users in Supabase:**
+
+1. Go to Supabase Dashboard → Authentication → Users
+2. Click "Add User" → "Create new user"
+3. Create users with emails like:
+   - `hogball-test-b@yourdomain.com` (secondary)
+   - `hogball-test-c@yourdomain.com` (tertiary)
+4. Use strong passwords (avoid `$` character)
+5. Add all credentials as GitHub secrets
+
+**Lesson:** Multi-user E2E tests (friend requests, messaging) require multiple test user accounts, not just one.
 
 ### Test Users Setup
 
