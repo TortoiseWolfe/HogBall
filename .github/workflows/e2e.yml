@@ -69,7 +69,10 @@ jobs:
       - name: Start server
         run: |
           # Serve static files from out directory at root
-          npx serve -s out -l 3000 --single &
+          # NOTE: Do NOT use -s or --single flags - those enable SPA mode
+          # which serves index.html for all routes. Next.js static export
+          # creates separate HTML files for each route.
+          npx serve out -l 3000 &
           sleep 5
           npx wait-on http://localhost:3000 --timeout 60000
         env:

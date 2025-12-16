@@ -116,7 +116,10 @@ export default defineConfig({
     ? undefined
     : process.env.CI
       ? {
-          command: 'npx serve -s out -l 3000',
+          // NOTE: Do NOT use -s or --single flags - those enable SPA mode
+          // which serves index.html for all routes. Next.js static export
+          // creates separate HTML files for each route.
+          command: 'npx serve out -l 3000',
           url: 'http://localhost:3000',
           reuseExistingServer: false,
           timeout: 60 * 1000,

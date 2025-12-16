@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), and **contract tests timeout due to Supabase latency** (Issue #22).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), and **E2E serve command uses SPA mode breaking static routes** (Issue #23).
 
 ---
 
@@ -813,6 +813,42 @@ it('should auto-update updated_at timestamp', async () => {
 **Affected File:** `tests/contract/profile/update-profile.contract.test.ts`
 
 **Lesson:** Any test that hits real external services (Supabase, APIs) should have explicit timeouts, especially if they include deliberate delays.
+
+### Issue 23: E2E Serve Command Uses SPA Mode Breaking Static Routes
+
+**Problem:** E2E tests navigate to the correct URL (e.g., `/sign-up`) but always see the home page content. All E2E tests fail because they can't find expected page elements.
+
+**Error (from page snapshot):**
+
+Tests expected to be on `/sign-up` but the page snapshot shows home page content with navigation links to Sign In and Sign Up.
+
+**Root Cause:** The `serve` command in both `e2e.yml` and `playwright.config.ts` uses `-s` and `--single` flags:
+
+```bash
+npx serve -s out -l 3000 --single &
+```
+
+These flags enable **SPA mode**, which serves `index.html` for ALL routes. This is wrong for Next.js static export where each route has its own HTML file (e.g., `out/sign-up/index.html`).
+
+When Playwright navigates to `/sign-up`, the server serves `out/index.html` (home page) instead of `out/sign-up/index.html`.
+
+**Fix Applied:** Removed `-s` and `--single` flags from:
+
+- `.github/workflows/e2e.yml` (line 72)
+- `playwright.config.ts` (line 119)
+
+Correct command:
+
+```bash
+npx serve out -l 3000 &
+```
+
+**Affected Files:**
+
+- `.github/workflows/e2e.yml`
+- `playwright.config.ts`
+
+**Lesson:** When serving Next.js static exports (`output: 'export'`), do NOT use SPA mode flags. Each route has its own `index.html` file that needs to be served directly.
 
 ### Test Users Setup
 
