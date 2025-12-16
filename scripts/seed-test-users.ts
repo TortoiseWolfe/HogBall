@@ -26,18 +26,27 @@ import * as crypto from 'crypto';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Get passwords from env vars - REQUIRED, no fallbacks
+// Get credentials from env vars - REQUIRED, no fallbacks
+const PRIMARY_EMAIL = process.env.TEST_USER_PRIMARY_EMAIL;
 const PRIMARY_PASSWORD = process.env.TEST_USER_PRIMARY_PASSWORD;
+const SECONDARY_EMAIL = process.env.TEST_USER_SECONDARY_EMAIL;
 const SECONDARY_PASSWORD = process.env.TEST_USER_SECONDARY_PASSWORD;
+const TERTIARY_EMAIL = process.env.TEST_USER_TERTIARY_EMAIL;
 const TERTIARY_PASSWORD = process.env.TEST_USER_TERTIARY_PASSWORD;
 
 // Validate required env vars
-if (!PRIMARY_PASSWORD || !SECONDARY_PASSWORD || !TERTIARY_PASSWORD) {
-  console.error('❌ ERROR: Missing test user passwords in environment');
+const missing: string[] = [];
+if (!PRIMARY_EMAIL) missing.push('TEST_USER_PRIMARY_EMAIL');
+if (!PRIMARY_PASSWORD) missing.push('TEST_USER_PRIMARY_PASSWORD');
+if (!SECONDARY_EMAIL) missing.push('TEST_USER_SECONDARY_EMAIL');
+if (!SECONDARY_PASSWORD) missing.push('TEST_USER_SECONDARY_PASSWORD');
+if (!TERTIARY_EMAIL) missing.push('TEST_USER_TERTIARY_EMAIL');
+if (!TERTIARY_PASSWORD) missing.push('TEST_USER_TERTIARY_PASSWORD');
+
+if (missing.length > 0) {
+  console.error('❌ ERROR: Missing test user credentials in environment');
   console.error('Required environment variables:');
-  if (!PRIMARY_PASSWORD) console.error('  - TEST_USER_PRIMARY_PASSWORD');
-  if (!SECONDARY_PASSWORD) console.error('  - TEST_USER_SECONDARY_PASSWORD');
-  if (!TERTIARY_PASSWORD) console.error('  - TEST_USER_TERTIARY_PASSWORD');
+  missing.forEach((v) => console.error(`  - ${v}`));
   console.error('\nAdd these to your .env file');
   process.exit(1);
 }
@@ -78,19 +87,19 @@ interface TestUser {
 
 const TEST_USERS: TestUser[] = [
   {
-    email: 'test@example.com',
+    email: PRIMARY_EMAIL,
     password: PRIMARY_PASSWORD,
     username: 'testuser',
     displayName: 'Test User',
   },
   {
-    email: 'test-user-b@example.com',
+    email: SECONDARY_EMAIL,
     password: SECONDARY_PASSWORD,
     username: 'testuser-b',
     displayName: 'Test User B',
   },
   {
-    email: 'test-user-c@example.com',
+    email: TERTIARY_EMAIL,
     password: TERTIARY_PASSWORD,
     username: 'testuser-c',
     displayName: 'Test User C',

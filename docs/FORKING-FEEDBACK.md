@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), and **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), and **seed script uses hardcoded emails instead of env vars** (Issue #25).
 
 ---
 
@@ -892,6 +892,38 @@ process.env.TEST_USER_TERTIARY_PASSWORD;
 5. Add all credentials as GitHub secrets
 
 **Lesson:** Multi-user E2E tests (friend requests, messaging) require multiple test user accounts, not just one.
+
+### Issue 25: Seed Script Uses Hardcoded Test User Emails
+
+**Problem:** The `scripts/seed-test-users.ts` script reads test user emails from environment variables but the `TEST_USERS` array was hardcoded to use `test@example.com`, `test-user-b@example.com`, and `test-user-c@example.com` instead of the env var values.
+
+**Symptom:** Users create test accounts in Supabase with their own emails (e.g., `hogball-test-a@mydomain.com`) and add them to `.env`, but the seed script ignores those and tries to create users with hardcoded emails that don't match.
+
+**Root Cause:** The script header read env vars into `PRIMARY_EMAIL`, `SECONDARY_EMAIL`, `TERTIARY_EMAIL` but the TEST_USERS array used hardcoded string literals:
+
+```typescript
+// Reads env vars correctly
+const PRIMARY_EMAIL = process.env.TEST_USER_PRIMARY_EMAIL;
+
+// But TEST_USERS array had hardcoded emails
+const TEST_USERS: TestUser[] = [
+  { email: 'test@example.com', ... },  // Wrong! Should be PRIMARY_EMAIL
+];
+```
+
+**Fix Applied:** Updated TEST_USERS array to use the env var values:
+
+```typescript
+const TEST_USERS: TestUser[] = [
+  { email: PRIMARY_EMAIL, password: PRIMARY_PASSWORD, ... },
+  { email: SECONDARY_EMAIL, password: SECONDARY_PASSWORD, ... },
+  { email: TERTIARY_EMAIL, password: TERTIARY_PASSWORD, ... },
+];
+```
+
+**Affected File:** `scripts/seed-test-users.ts`
+
+**Lesson:** When scripts read configuration from environment variables, use those variables consistently throughout the script. Don't mix env vars with hardcoded fallbacks unless explicitly intended.
 
 ### Test Users Setup
 
