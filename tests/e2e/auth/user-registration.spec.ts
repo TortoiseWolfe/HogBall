@@ -5,7 +5,15 @@
  * sign-up → verify email → sign-in → access protected pages
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+// Helper to dismiss cookie banner
+async function dismissCookieBanner(page: Page) {
+  const cookieAccept = page.getByRole('button', { name: /accept/i });
+  if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await cookieAccept.click();
+  }
+}
 
 test.describe('User Registration E2E', () => {
   const testEmail = `hogballtest+reg-${Date.now()}@gmail.com`;
@@ -13,6 +21,8 @@ test.describe('User Registration E2E', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
   });
 
   test('should complete full registration flow from sign-up to protected access', async ({

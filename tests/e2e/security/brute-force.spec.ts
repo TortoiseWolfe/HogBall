@@ -2,7 +2,15 @@
 // Feature 017 - Task T015
 // Purpose: Test server-side rate limiting prevents brute force attacks
 
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+// Helper to dismiss cookie banner
+async function dismissCookieBanner(page: Page) {
+  const cookieAccept = page.getByRole('button', { name: /accept/i });
+  if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await cookieAccept.click();
+  }
+}
 
 test.describe('Brute Force Prevention - REQ-SEC-003', () => {
   const testEmail = `hogballtest+brute-${Date.now()}@gmail.com`;
@@ -10,6 +18,8 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
 
   test('should lockout after 5 failed login attempts', async ({ page }) => {
     await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
     // Attempt 1-5: Try to sign in with wrong password
     for (let i = 1; i <= 5; i++) {
@@ -95,6 +105,8 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     const uniqueEmail = `hogballtest+attempts-${Date.now()}@gmail.com`;
 
     await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
     // First attempt
     await page.fill('input[type="email"]', uniqueEmail);
@@ -129,6 +141,8 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
 
     // Lock out User A
     await pageA.goto('/sign-in');
+    await pageA.waitForLoadState('networkidle');
+    await dismissCookieBanner(pageA);
     for (let i = 0; i < 5; i++) {
       await pageA.fill('input[type="email"]', userA);
       await pageA.fill('input[type="password"]', wrongPassword);
@@ -163,6 +177,8 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
 
     // Lock out sign_in attempts
     await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     for (let i = 0; i < 5; i++) {
       await page.fill('input[type="email"]', email);
       await page.fill('input[type="password"]', wrongPassword);
@@ -178,6 +194,8 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
 
     // But sign_up should still work
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page.fill('input[type="email"]', email);
     await page.fill('input[type="password"]', 'ValidPassword123!');
     await page.click('button[type="submit"]');
@@ -192,6 +210,8 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     const email = `hogballtest+bypass-${Date.now()}@gmail.com`;
 
     await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
     // Make 5 failed attempts
     for (let i = 0; i < 5; i++) {
@@ -219,6 +239,8 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     const email = `hogballtest+lockout-${Date.now()}@gmail.com`;
 
     await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
     // Trigger lockout
     for (let i = 0; i < 5; i++) {

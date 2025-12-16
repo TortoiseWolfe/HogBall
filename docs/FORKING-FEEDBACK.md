@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28), and **Supabase validates email domain MX records** (Issue #29).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28), and **Supabase validates email domain MX records** (Issue #29), and **E2E tests don't dismiss cookie consent banner** (Issue #30).
 
 ---
 
@@ -1101,6 +1101,35 @@ return `hogballtest+${prefix}-${Date.now()}@gmail.com`;
 3. `@gmail.com` with plus aliases - **WORKS** (use `yourname+tag@gmail.com`)
 
 For production templates, consider using environment variables for the test email domain so forks can configure their own domain with proper MX records.
+
+### Issue 30: E2E Tests Don't Dismiss Cookie Consent Banner
+
+**Problem:** E2E tests fill out forms but interactions fail because the cookie consent banner overlays the page and intercepts button clicks.
+
+**Symptom:** Tests show forms correctly filled but get stuck on pages like "Create Account" - the Sign Up button click never registers because the cookie banner is in the way.
+
+**Root Cause:** The `sign-up.spec.ts` test properly dismisses the cookie banner:
+
+```typescript
+const cookieAccept = page.getByRole('button', { name: /accept/i });
+if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
+  await cookieAccept.click();
+}
+```
+
+But other test files (`session-persistence.spec.ts`, `rate-limiting.spec.ts`, `protected-routes.spec.ts`, `user-registration.spec.ts`, `brute-force.spec.ts`) were missing this handling.
+
+**Fix Applied:** Added cookie banner dismissal to all E2E test files that interact with forms:
+
+1. Added `dismissCookieBanner()` helper function to each file
+2. Called helper after each `page.goto()` before form interactions
+3. Added `await page.waitForLoadState('networkidle')` before dismissing banner
+
+**Lesson:** When adding GDPR/cookie consent features:
+
+1. Add cookie handling to E2E test global setup or fixtures
+2. Or document that all E2E tests must dismiss the banner before interactions
+3. Consider auto-accepting cookies in test environment via environment variable
 
 ### Test Users Setup
 

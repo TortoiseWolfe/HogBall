@@ -16,6 +16,13 @@ test.describe('Session Persistence E2E', () => {
   test.beforeEach(async ({ page }) => {
     // Create test user
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+
+    // Dismiss cookie banner if visible
+    const cookieAccept = page.getByRole('button', { name: /accept/i });
+    if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await cookieAccept.click();
+    }
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password').fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);

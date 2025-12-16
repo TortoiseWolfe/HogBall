@@ -18,6 +18,14 @@ test.describe('Rate Limiting - User Experience', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to sign-in page
     await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+
+    // Dismiss cookie banner if visible
+    const cookieAccept = page.getByRole('button', { name: /accept/i });
+    if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await cookieAccept.click();
+    }
+
     await expect(page).toHaveTitle(/Sign In/i);
   });
 

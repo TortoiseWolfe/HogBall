@@ -7,7 +7,15 @@
  * - Verify cascade delete removes user_profiles/audit_logs/payment_intents
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+// Helper to dismiss cookie banner
+async function dismissCookieBanner(page: Page) {
+  const cookieAccept = page.getByRole('button', { name: /accept/i });
+  if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await cookieAccept.click();
+  }
+}
 
 test.describe('Protected Routes E2E', () => {
   const testEmail = `hogballtest+protected-${Date.now()}@gmail.com`;
@@ -31,6 +39,8 @@ test.describe('Protected Routes E2E', () => {
   }) => {
     // Step 1: Sign up
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password').fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
@@ -62,6 +72,8 @@ test.describe('Protected Routes E2E', () => {
     // Step 1: Create first user
     const user1Email = `hogballtest+rls1-${Date.now()}@gmail.com`;
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(user1Email);
     await page.getByLabel('Password').fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
@@ -98,6 +110,8 @@ test.describe('Protected Routes E2E', () => {
   }) => {
     // Sign up with new user
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password').fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
@@ -120,6 +134,8 @@ test.describe('Protected Routes E2E', () => {
   test('should preserve session across page navigation', async ({ page }) => {
     // Sign up and sign in
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password').fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
@@ -143,6 +159,8 @@ test.describe('Protected Routes E2E', () => {
   test('should handle session expiration gracefully', async ({ page }) => {
     // Sign up
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password').fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
@@ -169,6 +187,8 @@ test.describe('Protected Routes E2E', () => {
     // Attempt to access protected route while unauthenticated
     await page.goto('/account');
     await page.waitForURL('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
     // Sign in
     await page.getByLabel('Email').fill(testEmail);
@@ -192,6 +212,8 @@ test.describe('Protected Routes E2E', () => {
 
     // For now, test the UI flow
     await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page
       .getByLabel('Email')
       .fill(`hogballtest+delete-${Date.now()}@gmail.com`);
