@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), and **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), and **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), and **E2E tests fail due to basePath mismatch** (Issue #20).
 
 ---
 
@@ -735,6 +735,33 @@ AssertionError: expected AuthApiError: Invalid login credentials { …(3) } to b
 - `.github/workflows/accessibility.yml`
 
 **Lesson:** When adding a new GitHub secret, you must ALSO add it to the workflow's `env:` section.
+
+### Issue 20: E2E Tests Fail Due to BasePath Mismatch
+
+**Problem:** E2E tests timeout with blank pages because the build includes `/HogBall/` basePath but tests run at `http://localhost:3000` (no basePath).
+
+**Error:** Tests show blank page with broken image icon. Links in page have `/HogBall/` prefix but server serves at root.
+
+**Root Cause:** The `next.config.ts` auto-detection logic treats empty string as "not set" and falls through to auto-detection. Setting `GITHUB_ACTIONS: false` doesn't reliably override since GitHub sets this at runner level.
+
+```javascript
+// This doesn't work - empty string falls through to auto-detection
+if (envBasePath !== undefined && envBasePath !== '') {
+  return envBasePath;
+}
+```
+
+**Fix Applied:**
+
+1. Updated `next.config.ts` to accept `'none'` as explicit empty basePath
+2. Updated `e2e.yml` to set `NEXT_PUBLIC_BASE_PATH: 'none'`
+
+```javascript
+// Now checks for 'none' to force empty basePath
+if (envBasePath === 'none' || envBasePath === '/') {
+  return ''; // Explicit empty base path
+}
+```
 
 ### Test Users Setup
 

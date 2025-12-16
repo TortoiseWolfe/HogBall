@@ -11,8 +11,12 @@ function detectProjectConfig() {
   }
 
   // Use environment variable if set (from .env.local or CI/CD)
+  // Check for explicit "none" value to force empty basePath (for E2E tests)
   // Treat empty string as undefined to allow auto-detection in forks
   const envBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
+  if (envBasePath === 'none' || envBasePath === '/') {
+    return ''; // Explicit empty base path
+  }
   if (envBasePath !== undefined && envBasePath !== '') {
     return envBasePath;
   }

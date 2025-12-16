@@ -50,7 +50,8 @@ jobs:
       - name: Build application
         run: pnpm build
         env:
-          # Don't use GitHub base path for E2E tests - build for local testing
+          # Set 'none' to force empty base path for E2E tests (overrides auto-detection)
+          NEXT_PUBLIC_BASE_PATH: 'none'
           GITHUB_ACTIONS: false
           NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
           NEXT_PUBLIC_EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
