@@ -39,7 +39,7 @@
     "testThemes": ["light", "dark", "synthwave", "cyberpunk", "dracula"]
   },
   "forms": {
-    "validEmail": "test@tortoisewolfe.com",
+    "validEmail": "hogballtest@gmail.com",
     "invalidEmail": "invalid-email",
     "validPhone": "+1234567890",
     "invalidPhone": "123",

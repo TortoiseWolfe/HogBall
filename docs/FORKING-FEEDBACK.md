@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28), and **Supabase validates email domain MX records** (Issue #29).
 
 ---
 
@@ -1059,6 +1059,48 @@ const testEmail = `e2e-session-${Date.now()}@example.com`;
 
 - Static hardcoded emails (seed scripts, fixtures)
 - Dynamic runtime-generated emails (test utility functions, inline test data)
+
+### Issue 29: Supabase Validates Email Domain MX Records
+
+**Problem:** After fixing Issue #28 to use `@tortoisewolfe.com` instead of `@example.com`, E2E tests still failed. Supabase Auth validates that email domains have valid MX (mail exchange) records. Domains without email infrastructure are rejected.
+
+**Symptom:** Sign-up attempts return:
+
+```json
+{
+  "code": 400,
+  "error_code": "email_address_invalid",
+  "msg": "Email address \"test@tortoisewolfe.com\" is invalid"
+}
+```
+
+**Root Cause:** Supabase doesn't just block `example.com` - it validates ALL email domains for valid MX records. The `tortoisewolfe.com` domain doesn't have email infrastructure configured.
+
+**Fix Applied:** Changed all E2E test emails to use Gmail plus aliases:
+
+```typescript
+// Before (blocked - no MX records):
+return `${prefix}-${Date.now()}@tortoisewolfe.com`;
+
+// After (works - Gmail has MX records):
+return `hogballtest+${prefix}-${Date.now()}@gmail.com`;
+```
+
+**Files Updated:**
+
+- `tests/e2e/utils/test-user-factory.ts`
+- `tests/e2e/auth/*.spec.ts`
+- `tests/e2e/security/brute-force.spec.ts`
+- `tests/e2e/fixtures/users.json`
+- `tests/e2e/fixtures/test-data.json`
+
+**Lesson:** When choosing email domains for E2E tests with Supabase:
+
+1. `@example.com` - **BLOCKED** (reserved domain)
+2. `@yourdomain.com` - **BLOCKED** unless you have MX records configured
+3. `@gmail.com` with plus aliases - **WORKS** (use `yourname+tag@gmail.com`)
+
+For production templates, consider using environment variables for the test email domain so forks can configure their own domain with proper MX records.
 
 ### Test Users Setup
 
