@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), and **seed script uses hardcoded emails instead of env vars** (Issue #25).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), and **Supabase blocks example.com test emails** (Issue #26).
 
 ---
 
@@ -924,6 +924,52 @@ const TEST_USERS: TestUser[] = [
 **Affected File:** `scripts/seed-test-users.ts`
 
 **Lesson:** When scripts read configuration from environment variables, use those variables consistently throughout the script. Don't mix env vars with hardcoded fallbacks unless explicitly intended.
+
+### Issue 26: Supabase Blocks `example.com` Test Emails
+
+**Problem:** Supabase Auth rejects emails with `example.com` domain as invalid, even via the admin API with service_role key.
+
+**Error:**
+
+```
+Email address "test@example.com" is invalid
+```
+
+Or via admin API:
+
+```json
+{
+  "code": 500,
+  "error_code": "unexpected_failure",
+  "msg": "Database error checking email"
+}
+```
+
+**Root Cause:** Supabase has email validation that blocks known test/placeholder domains like `example.com`. The seed script's hardcoded emails (`test@example.com`, `test-user-b@example.com`) are rejected.
+
+**Symptoms:**
+
+- Seed script fails with "Database error checking email"
+- Admin API returns 500 errors on user creation
+- Public sign-up API returns "Email address is invalid"
+
+**Fix:** Use real email domains for test users:
+
+```bash
+# In .env - use your actual domain
+TEST_USER_PRIMARY_EMAIL=myproject-test-a@mydomain.com
+TEST_USER_SECONDARY_EMAIL=myproject-test-b@mydomain.com
+TEST_USER_TERTIARY_EMAIL=myproject-test-c@mydomain.com
+```
+
+**Note:** Gmail addresses like `testuser@gmail.com` also work. The key is avoiding placeholder domains like `example.com`, `test.com`, etc.
+
+**Affected Files:**
+
+- `scripts/seed-test-users.ts` - Now uses env vars instead of hardcoded emails
+- `.env` - Must contain real email addresses
+
+**Lesson:** Never use `example.com` or similar placeholder domains with Supabase Auth. Use real email domains that you control or common providers like Gmail.
 
 ### Test Users Setup
 
