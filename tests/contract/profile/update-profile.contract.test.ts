@@ -12,6 +12,7 @@ describe('User Profile UPDATE Contract', () => {
   let supabase: ReturnType<typeof createClient>;
   let testUserId: string;
 
+  // Contract tests hit real Supabase - need longer timeout
   beforeAll(async () => {
     supabase = createClient();
 
@@ -136,5 +137,5 @@ describe('User Profile UPDATE Contract', () => {
     expect(new Date(after!.updated_at).getTime()).toBeGreaterThan(
       new Date(before!.updated_at).getTime()
     );
-  });
+  }, 15000); // Extended timeout: 1s wait + multiple Supabase round-trips
 });

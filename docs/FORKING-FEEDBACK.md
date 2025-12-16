@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), and **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), and **E2E tests fail due to basePath mismatch** (Issue #20), and **E2E workflow missing Supabase credentials** (Issue #21).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), and **contract tests timeout due to Supabase latency** (Issue #22).
 
 ---
 
@@ -788,6 +788,31 @@ TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
 ```
 
 **Lesson:** Every workflow that runs tests needs ALL the environment variables the app depends on, not just the obvious ones.
+
+### Issue 22: Contract Tests Timeout Due to Supabase Latency
+
+**Problem:** Contract tests that hit real Supabase instances timeout with the default 5000ms Vitest timeout. Tests with deliberate delays (like `updated_at` timestamp verification) are especially prone to failure.
+
+**Error:**
+
+```
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+```
+
+**Root Cause:** Contract tests make real network calls to Supabase. With a 1-second deliberate wait plus multiple round-trips, the default 5000ms is insufficient.
+
+**Fix Applied:** Added explicit timeout to tests with delays:
+
+```typescript
+it('should auto-update updated_at timestamp', async () => {
+  // Test body with 1s delay + multiple Supabase calls
+}, 15000); // Extended timeout: 1s wait + multiple Supabase round-trips
+```
+
+**Affected File:** `tests/contract/profile/update-profile.contract.test.ts`
+
+**Lesson:** Any test that hits real external services (Supabase, APIs) should have explicit timeouts, especially if they include deliberate delays.
 
 ### Test Users Setup
 
