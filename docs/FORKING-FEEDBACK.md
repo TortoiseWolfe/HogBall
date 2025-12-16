@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), and **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), and **E2E tests fail due to basePath mismatch** (Issue #20).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), and **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), and **E2E tests fail due to basePath mismatch** (Issue #20), and **E2E workflow missing Supabase credentials** (Issue #21).
 
 ---
 
@@ -762,6 +762,32 @@ if (envBasePath === 'none' || envBasePath === '/') {
   return ''; // Explicit empty base path
 }
 ```
+
+### Issue 21: E2E Workflow Missing Supabase Credentials
+
+**Problem:** Even after fixing basePath, E2E tests fail because the app shows "Supabase is not configured" banner. Auth-related tests can't run.
+
+**Root Cause:** The `e2e.yml` workflow was missing Supabase environment variables in both the build and test steps.
+
+**Fix Applied:** Added to `e2e.yml`:
+
+Build step:
+
+```yaml
+NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+```
+
+Test step:
+
+```yaml
+NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+TEST_USER_PRIMARY_EMAIL: ${{ secrets.TEST_USER_PRIMARY_EMAIL }}
+TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+```
+
+**Lesson:** Every workflow that runs tests needs ALL the environment variables the app depends on, not just the obvious ones.
 
 ### Test Users Setup
 

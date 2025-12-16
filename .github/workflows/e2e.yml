@@ -53,6 +53,8 @@ jobs:
           # Set 'none' to force empty base path for E2E tests (overrides auto-detection)
           NEXT_PUBLIC_BASE_PATH: 'none'
           GITHUB_ACTIONS: false
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
           NEXT_PUBLIC_EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
           NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
@@ -91,6 +93,11 @@ jobs:
           # Tests expect app at root, not with base path
           BASE_URL: http://localhost:3000
           DEBUG: pw:api
+          # Supabase credentials for auth tests
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ secrets.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
 
       - name: Upload test results
         if: always()
