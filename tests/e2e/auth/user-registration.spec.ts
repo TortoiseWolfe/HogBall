@@ -8,7 +8,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('User Registration E2E', () => {
-  const testEmail = `e2e-registration-${Date.now()}@example.com`;
+  const testEmail = `e2e-registration-${Date.now()}@tortoisewolfe.com`;
   const testPassword = 'ValidPass123!';
 
   test.beforeEach(async ({ page }) => {
@@ -89,7 +89,7 @@ test.describe('User Registration E2E', () => {
     await page.goto('/sign-up');
 
     // Fill with weak password
-    await page.getByLabel('Email').fill(`${Date.now()}@example.com`);
+    await page.getByLabel('Email').fill(`${Date.now()}@tortoisewolfe.com`);
     await page.getByLabel('Password').fill('weak');
     await page.getByLabel('Confirm Password').fill('weak');
 
@@ -106,7 +106,7 @@ test.describe('User Registration E2E', () => {
     await page.goto('/sign-up');
 
     // Fill with mismatched passwords
-    await page.getByLabel('Email').fill(`${Date.now()}@example.com`);
+    await page.getByLabel('Email').fill(`${Date.now()}@tortoisewolfe.com`);
     await page.getByLabel('Password').fill(testPassword);
     await page.getByLabel('Confirm Password').fill('DifferentPass123!');
 

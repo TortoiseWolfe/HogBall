@@ -252,9 +252,10 @@ export function isAdminClientAvailable(): boolean {
 
 /**
  * Generate a unique test email
+ * Uses @tortoisewolfe.com domain because Supabase Auth blocks @example.com
  */
 export function generateTestEmail(prefix = 'e2e-test'): string {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@tortoisewolfe.com`;
 }
 
 /**

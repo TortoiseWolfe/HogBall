@@ -3,7 +3,7 @@
     {
       "id": "user1",
       "name": "Test User",
-      "email": "testuser@example.com",
+      "email": "testuser@tortoisewolfe.com",
       "role": "user",
       "preferences": {
         "theme": "light",
@@ -21,7 +21,7 @@
     {
       "id": "user2",
       "name": "Dark Mode User",
-      "email": "darkmode@example.com",
+      "email": "darkmode@tortoisewolfe.com",
       "role": "user",
       "preferences": {
         "theme": "dark",
@@ -39,7 +39,7 @@
     {
       "id": "user3",
       "name": "Accessibility User",
-      "email": "a11y@example.com",
+      "email": "a11y@tortoisewolfe.com",
       "role": "user",
       "preferences": {
         "theme": "high-contrast",
@@ -57,7 +57,7 @@
     {
       "id": "user4",
       "name": "Mobile User",
-      "email": "mobile@example.com",
+      "email": "mobile@tortoisewolfe.com",
       "role": "user",
       "device": "mobile",
       "preferences": {
@@ -76,7 +76,7 @@
     {
       "id": "admin1",
       "name": "Admin User",
-      "email": "admin@example.com",
+      "email": "admin@tortoisewolfe.com",
       "role": "admin",
       "preferences": {
         "theme": "corporate",
@@ -186,7 +186,7 @@
     "valid": {
       "username": "testuser",
       "password": "Test@123456",
-      "email": "test@example.com"
+      "email": "test@tortoisewolfe.com"
     },
     "invalid": {
       "username": "invalid",
@@ -196,21 +196,21 @@
     "locked": {
       "username": "locked",
       "password": "Test@123456",
-      "email": "locked@example.com",
+      "email": "locked@tortoisewolfe.com",
       "status": "locked"
     }
   },
   "formData": {
     "contact": {
       "name": "John Doe",
-      "email": "john.doe@example.com",
+      "email": "john.doe@tortoisewolfe.com",
       "subject": "Test Message",
       "message": "This is a test message from E2E tests."
     },
     "signup": {
       "firstName": "John",
       "lastName": "Doe",
-      "email": "john.doe@example.com",
+      "email": "john.doe@tortoisewolfe.com",
       "password": "SecurePass@123",
       "confirmPassword": "SecurePass@123",
       "terms": true,

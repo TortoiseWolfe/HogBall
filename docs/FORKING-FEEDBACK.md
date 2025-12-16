@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), and **README secrets not organized by priority** (Issue #27).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28).
 
 ---
 
@@ -1016,6 +1016,49 @@ TEST_USER_TERTIARY_EMAIL=myproject-test-c@mydomain.com
 **Affected File:** `README.md`
 
 **Lesson:** Group required secrets together at the top so forkers can get CI passing quickly before adding optional configuration.
+
+### Issue 28: E2E Tests Dynamically Generate @example.com Emails
+
+**Problem:** While Issue #26 fixed hardcoded `@example.com` emails in the seed script, the E2E test files themselves dynamically generate `@example.com` emails at runtime. These emails are also blocked by Supabase Auth.
+
+**Symptom:** E2E tests timeout after 30 minutes because tests hang trying to create users with blocked email domains. Tests show sign-up forms filled with emails like:
+
+```
+e2e-session-1765905032474@example.com
+ratelimit-test-1765905123456@example.com
+test-signup-1765905234567@example.com
+```
+
+**Root Cause:** Multiple E2E test files generate their own test emails using patterns like:
+
+```typescript
+const testEmail = `e2e-session-${Date.now()}@example.com`;
+```
+
+**Affected Files:**
+
+| File                                       | Pattern                                        |
+| ------------------------------------------ | ---------------------------------------------- |
+| `tests/e2e/utils/test-user-factory.ts:257` | `generateTestEmail()` returns `@example.com`   |
+| `tests/e2e/auth/session-persistence.spec`  | `e2e-session-${Date.now()}@example.com`        |
+| `tests/e2e/auth/rate-limiting.spec`        | `ratelimit-test-${Date.now()}@example.com`     |
+| `tests/e2e/auth/sign-up.spec`              | `test-signup-${timestamp}@example.com`         |
+| `tests/e2e/auth/user-registration.spec`    | `e2e-registration-${Date.now()}@example.com`   |
+| `tests/e2e/auth/protected-routes.spec`     | `e2e-protected-${Date.now()}@example.com`      |
+| `tests/e2e/security/brute-force.spec`      | Multiple `${prefix}-${Date.now()}@example.com` |
+| `tests/e2e/fixtures/users.json`            | 10+ hardcoded `@example.com` emails            |
+| `tests/e2e/fixtures/test-data.json`        | `validEmail: "test@example.com"`               |
+
+**Fix Applied:** Changed all `@example.com` to `@tortoisewolfe.com` (or your real domain):
+
+1. `tests/e2e/utils/test-user-factory.ts` - Updated `generateTestEmail()` function
+2. All E2E auth/security spec files - Updated dynamic email generation
+3. All fixture JSON files - Updated hardcoded emails
+
+**Lesson:** When Supabase blocks a domain, check BOTH:
+
+- Static hardcoded emails (seed scripts, fixtures)
+- Dynamic runtime-generated emails (test utility functions, inline test data)
 
 ### Test Users Setup
 
