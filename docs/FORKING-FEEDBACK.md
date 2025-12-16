@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), and **Supabase blocks example.com test emails** (Issue #26).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), and **README secrets not organized by priority** (Issue #27).
 
 ---
 
@@ -970,6 +970,52 @@ TEST_USER_TERTIARY_EMAIL=myproject-test-c@mydomain.com
 - `.env` - Must contain real email addresses
 
 **Lesson:** Never use `example.com` or similar placeholder domains with Supabase Auth. Use real email domains that you control or common providers like Gmail.
+
+### Issue 27: README Secrets Not Organized by Priority
+
+**Problem:** The README lists GitHub Actions secrets in categories (Author, Calendar, Site, Supabase, Testing) but doesn't distinguish between **required** and **optional** secrets. Forkers waste time adding optional secrets before realizing CI fails without the required ones.
+
+**Current Structure:**
+
+```
+- Author Information (8 optional)
+- Calendar Integration (2 optional)
+- Site Configuration (5 optional)
+- Supabase Public (2 REQUIRED)
+- Supabase Private (4 - some required)
+- Testing (6 REQUIRED)
+```
+
+**Suggested Fix:** Reorganize README secrets section to put required secrets first:
+
+```markdown
+## 🔐 GitHub Actions Secrets
+
+### Required for CI/CD (Add These First)
+
+| Secret                        | Purpose               |
+| ----------------------------- | --------------------- |
+| NEXT_PUBLIC_SUPABASE_URL      | Supabase project URL  |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase public key   |
+| SUPABASE_SERVICE_ROLE_KEY     | Admin operations      |
+| TEST_USER_PRIMARY_EMAIL       | Primary test account  |
+| TEST_USER_PRIMARY_PASSWORD    | Primary test password |
+| TEST_USER_SECONDARY_EMAIL     | Multi-user tests      |
+| TEST_USER_SECONDARY_PASSWORD  | Multi-user tests      |
+| TEST_USER_TERTIARY_EMAIL      | Group chat tests      |
+| TEST_USER_TERTIARY_PASSWORD   | Group chat tests      |
+
+### Optional (Add Later)
+
+- Author Information
+- Calendar Integration
+- Site Configuration
+- Analytics
+```
+
+**Affected File:** `README.md`
+
+**Lesson:** Group required secrets together at the top so forkers can get CI passing quickly before adding optional configuration.
 
 ### Test Users Setup
 
