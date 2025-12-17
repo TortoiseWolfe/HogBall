@@ -16,7 +16,6 @@ async function dismissCookieBanner(page: Page) {
 }
 
 test.describe('User Registration E2E', () => {
-  const testEmail = `hogballtest+reg-${Date.now()}@gmail.com`;
   const testPassword = 'ValidPass123!';
 
   test.beforeEach(async ({ page }) => {
@@ -28,6 +27,8 @@ test.describe('User Registration E2E', () => {
   test('should complete full registration flow from sign-up to protected access', async ({
     page,
   }) => {
+    const testEmail = `hogballtest+reg-${Date.now()}@gmail.com`;
+
     // Step 1: Navigate to sign-up page
     await page.goto('/sign-up');
     await expect(page).toHaveURL('/sign-up');

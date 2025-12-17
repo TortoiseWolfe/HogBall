@@ -18,7 +18,7 @@ async function dismissCookieBanner(page: Page) {
 }
 
 test.describe('Protected Routes E2E', () => {
-  const testEmail = `hogballtest+protected-${Date.now()}@gmail.com`;
+  // Each test generates its own unique email to avoid conflicts
   const testPassword = 'ValidPass123!';
 
   test('should redirect unauthenticated users to sign-in', async ({ page }) => {
@@ -37,6 +37,8 @@ test.describe('Protected Routes E2E', () => {
   test('should allow authenticated users to access protected routes', async ({
     page,
   }) => {
+    const testEmail = `hogballtest+auth-${Date.now()}@gmail.com`;
+
     // Step 1: Sign up
     await page.goto('/sign-up');
     await page.waitForLoadState('networkidle');
@@ -108,6 +110,8 @@ test.describe('Protected Routes E2E', () => {
   test('should show email verification notice for unverified users', async ({
     page,
   }) => {
+    const testEmail = `hogballtest+verify-${Date.now()}@gmail.com`;
+
     // Sign up with new user
     await page.goto('/sign-up');
     await page.waitForLoadState('networkidle');
@@ -132,6 +136,8 @@ test.describe('Protected Routes E2E', () => {
   });
 
   test('should preserve session across page navigation', async ({ page }) => {
+    const testEmail = `hogballtest+session-${Date.now()}@gmail.com`;
+
     // Sign up and sign in
     await page.goto('/sign-up');
     await page.waitForLoadState('networkidle');
@@ -157,6 +163,8 @@ test.describe('Protected Routes E2E', () => {
   });
 
   test('should handle session expiration gracefully', async ({ page }) => {
+    const testEmail = `hogballtest+expire-${Date.now()}@gmail.com`;
+
     // Sign up
     await page.goto('/sign-up');
     await page.waitForLoadState('networkidle');
@@ -184,6 +192,22 @@ test.describe('Protected Routes E2E', () => {
   test('should redirect to intended URL after authentication', async ({
     page,
   }) => {
+    const testEmail = `hogballtest+redirect-${Date.now()}@gmail.com`;
+
+    // First, create a user
+    await page.goto('/sign-up');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
+    await page.getByLabel('Email').fill(testEmail);
+    await page.getByLabel('Password', { exact: true }).fill(testPassword);
+    await page.getByLabel('Confirm Password').fill(testPassword);
+    await page.getByRole('button', { name: 'Sign Up' }).click();
+    await page.waitForURL(/\/(verify-email|profile)/);
+
+    // Sign out
+    await page.getByRole('button', { name: 'Sign Out' }).click();
+    await page.waitForURL('/sign-in');
+
     // Attempt to access protected route while unauthenticated
     await page.goto('/account');
     await page.waitForURL('/sign-in');
