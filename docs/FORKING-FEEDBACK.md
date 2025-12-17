@@ -4,7 +4,7 @@ This document captures issues encountered when forking the HogBall template to c
 
 ## Summary
 
-Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28), and **Supabase validates email domain MX records** (Issue #29), **E2E tests don't dismiss cookie consent banner** (Issue #30), and **E2E Password field selector ambiguity** (Issue #31).
+Forking HogBall required updating **200+ files** with hardcoded references. The Docker-first architecture also created friction with git hooks. Additionally, tests require Supabase mocking, description assertions need updating, **the basePath secret in deploy.yml breaks GitHub Pages for forks** (Issue #10), **production crashes without Supabase GitHub secrets** (Issue #11), **the footer template link needs manual update** (Issue #12), **the PWA manifest description is generated at build time** (Issue #13), **migrations need auth.users INSERT before user_profiles** (Issue #14), **passwords can't use $ character in .env** (Issue #15), **Supabase dashboard paths changed in 2025** (Issue #16), **GitHub Actions CI requires 6 secrets, not 3** (Issue #17), **monitor workflow has hardcoded domain URLs** (Issue #18), **CI workflow missing TEST_USER_PRIMARY_EMAIL env var** (Issue #19), **E2E tests fail due to basePath mismatch** (Issue #20), **E2E workflow missing Supabase credentials** (Issue #21), **contract tests timeout due to Supabase latency** (Issue #22), **E2E serve command uses SPA mode breaking static routes** (Issue #23), **E2E workflow missing 5 critical secrets causing 30-minute timeout** (Issue #24), **seed script uses hardcoded emails instead of env vars** (Issue #25), **Supabase blocks example.com test emails** (Issue #26), **README secrets not organized by priority** (Issue #27), and **E2E tests dynamically generate @example.com emails** (Issue #28), and **Supabase validates email domain MX records** (Issue #29), **E2E tests don't dismiss cookie consent banner** (Issue #30), and **E2E Password field selector ambiguity** (Issue #31), and **session-persistence.spec.ts signs up same user 8 times** (Issue #32).
 
 ---
 
@@ -1161,6 +1161,53 @@ await page.getByLabel('Password').fill(password); // Ambiguous!
 - `tests/e2e/auth/user-registration.spec.ts`
 
 **Lesson:** When forms have multiple similar labels (Password/Confirm Password, Email/Confirm Email), always use `{ exact: true }` with `getByLabel()` to avoid ambiguity.
+
+### Issue 32: session-persistence.spec.ts Signs Up Same User 8 Times
+
+**Problem:** The `session-persistence.spec.ts` test file has a `beforeEach` that signs up a new user before EVERY test, but uses the same email address (defined at describe-block level with `Date.now()`).
+
+**Symptom:** Tests show "email rate limit exceeded" error after the first test passes.
+
+**Root Cause:**
+
+```typescript
+// Line 13: Date.now() runs ONCE when file loads
+const testEmail = `hogballtest+session-${Date.now()}@gmail.com`;
+
+// Lines 16-30: beforeEach runs before EACH of 8 tests
+test.beforeEach(async ({ page }) => {
+  await page.goto('/sign-up');
+  await page.getByLabel('Email').fill(testEmail); // SAME email every time!
+  await page.getByRole('button', { name: 'Sign Up' }).click();
+});
+```
+
+**Result:** 8 tests × 1 beforeEach = 8 sign-up attempts with SAME email
+
+- Test 1: Signs up successfully
+- Tests 2-8: Either "user already exists" or "email rate limit exceeded"
+
+**Fix Applied:** Changed `beforeEach` to `beforeAll` for user creation:
+
+```typescript
+// Create user ONCE before all tests
+test.beforeAll(async ({ browser }) => {
+  const page = await browser.newPage();
+  await page.goto('/sign-up');
+  // ... sign up and sign out ...
+  await page.close();
+});
+
+// Each test starts on sign-in page
+test.beforeEach(async ({ page }) => {
+  await page.goto('/sign-in');
+  await dismissCookieBanner(page);
+});
+```
+
+**Affected File:** `tests/e2e/auth/session-persistence.spec.ts`
+
+**Lesson:** When multiple tests need the same test user, use `beforeAll` to create once. Only use `beforeEach` for per-test setup like navigation or state reset.
 
 ### Test Users Setup
 

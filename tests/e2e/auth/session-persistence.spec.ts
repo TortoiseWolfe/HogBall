@@ -7,38 +7,50 @@
  * - Verify session persists across browser restarts
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+// Helper to dismiss cookie banner
+async function dismissCookieBanner(page: Page) {
+  const cookieAccept = page.getByRole('button', { name: /accept/i });
+  if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await cookieAccept.click();
+  }
+}
 
 test.describe('Session Persistence E2E', () => {
   const testEmail = `hogballtest+session-${Date.now()}@gmail.com`;
   const testPassword = 'ValidPass123!';
 
-  test.beforeEach(async ({ page }) => {
-    // Create test user
+  // Create test user ONCE before all tests
+  test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage();
     await page.goto('/sign-up');
     await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
-    // Dismiss cookie banner if visible
-    const cookieAccept = page.getByRole('button', { name: /accept/i });
-    if (await cookieAccept.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await cookieAccept.click();
-    }
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Confirm Password').fill(testPassword);
     await page.getByRole('button', { name: 'Sign Up' }).click();
     await page.waitForURL(/\/(verify-email|profile)/);
 
-    // Sign out to test sign-in with Remember Me
+    // Sign out so tests can sign in
     await page.getByRole('button', { name: 'Sign Out' }).click();
     await page.waitForURL('/sign-in');
+    await page.close();
+  });
+
+  // Each test starts on sign-in page
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
   });
 
   test('should extend session duration with Remember Me checked', async ({
     page,
   }) => {
-    // Sign in with Remember Me
-    await page.goto('/sign-in');
+    // Sign in with Remember Me (already on sign-in page from beforeEach)
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Remember Me').check();
@@ -76,8 +88,7 @@ test.describe('Session Persistence E2E', () => {
   });
 
   test('should use short session without Remember Me', async ({ page }) => {
-    // Sign in WITHOUT Remember Me
-    await page.goto('/sign-in');
+    // Sign in WITHOUT Remember Me (already on sign-in page from beforeEach)
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     // Do NOT check Remember Me
@@ -99,8 +110,7 @@ test.describe('Session Persistence E2E', () => {
   test('should automatically refresh token before expiration', async ({
     page,
   }) => {
-    // Sign in
-    await page.goto('/sign-in');
+    // Sign in (already on sign-in page from beforeEach)
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByRole('button', { name: 'Sign In' }).click();
@@ -134,7 +144,7 @@ test.describe('Session Persistence E2E', () => {
   test('should persist session across browser restarts', async ({
     browser,
   }) => {
-    // Create persistent context
+    // Create persistent context (fresh, not using beforeEach page)
     const context = await browser.newContext({
       storageState: undefined, // Start fresh
     });
@@ -142,6 +152,8 @@ test.describe('Session Persistence E2E', () => {
 
     // Sign in with Remember Me
     await page.goto('/sign-in');
+    await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByLabel('Remember Me').check();
@@ -168,8 +180,7 @@ test.describe('Session Persistence E2E', () => {
   });
 
   test('should clear session on sign out', async ({ page }) => {
-    // Sign in
-    await page.goto('/sign-in');
+    // Sign in (already on sign-in page from beforeEach)
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByRole('button', { name: 'Sign In' }).click();
@@ -207,13 +218,15 @@ test.describe('Session Persistence E2E', () => {
   test('should handle concurrent tab sessions correctly', async ({
     browser,
   }) => {
-    // Create two tabs with same user
+    // Create two tabs with same user (fresh context, not using beforeEach page)
     const context = await browser.newContext();
     const page1 = await context.newPage();
     const page2 = await context.newPage();
 
     // Sign in on page 1
     await page1.goto('/sign-in');
+    await page1.waitForLoadState('networkidle');
+    await dismissCookieBanner(page1);
     await page1.getByLabel('Email').fill(testEmail);
     await page1.getByLabel('Password', { exact: true }).fill(testPassword);
     await page1.getByRole('button', { name: 'Sign In' }).click();
@@ -240,8 +253,7 @@ test.describe('Session Persistence E2E', () => {
   test('should refresh session automatically on page reload', async ({
     page,
   }) => {
-    // Sign in
-    await page.goto('/sign-in');
+    // Sign in (already on sign-in page from beforeEach)
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByRole('button', { name: 'Sign In' }).click();
@@ -267,7 +279,7 @@ test.describe('Session Persistence E2E', () => {
     // 4. Verify redirected to sign-in
 
     // For demonstration, test the refresh mechanism
-    await page.goto('/sign-in');
+    // (already on sign-in page from beforeEach)
     await page.getByLabel('Email').fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill(testPassword);
     await page.getByRole('button', { name: 'Sign In' }).click();
