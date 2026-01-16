@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import SignInForm from './SignInForm';
 
@@ -19,5 +19,18 @@ describe('SignInForm', () => {
     expect(form).toHaveClass(customClass);
   });
 
-  // TODO: Add more specific tests for SignInForm functionality
+  it('renders Remember Me checkbox', () => {
+    render(<SignInForm />);
+    expect(screen.getByLabelText('Remember Me')).toBeInTheDocument();
+  });
+
+  it('allows toggling Remember Me checkbox', () => {
+    render(<SignInForm />);
+    const checkbox = screen.getByLabelText('Remember Me') as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(true);
+    fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(false);
+  });
 });

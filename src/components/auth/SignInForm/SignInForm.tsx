@@ -38,6 +38,7 @@ export default function SignInForm({
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(
     null
   );
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,6 +218,9 @@ export default function SignInForm({
         // User will be prompted to re-authenticate when accessing messages
       }
 
+      // Store Remember Me preference for session management
+      localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
+
       // Successful sign-in
       onSuccess?.();
     }
@@ -259,6 +263,20 @@ export default function SignInForm({
           required
           disabled={loading}
         />
+      </div>
+
+      <div className="form-control">
+        <label className="label cursor-pointer justify-start gap-2">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="checkbox min-h-11 min-w-11"
+            disabled={loading}
+            aria-label="Remember Me"
+          />
+          <span className="label-text">Remember Me</span>
+        </label>
       </div>
 
       {error && (

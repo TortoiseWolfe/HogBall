@@ -30,11 +30,11 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
   });
 
   test('should complete sign-up with valid credentials', async ({ page }) => {
-    // Use a simple email format that Supabase accepts
-    const timestamp = Date.now();
-    const testEmail = `hogballtest+signup-${timestamp}@gmail.com`;
+    // Generate unique email for this test run
+    const testEmail = generateTestEmail('signup');
     createdEmails.push(testEmail);
 
+    // Go to sign-up page
     await page.goto('/sign-up');
     await page.waitForLoadState('networkidle');
 
@@ -44,47 +44,46 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
       await cookieAccept.click();
     }
 
-    // Page heading is "Create Account"
+    // Verify sign-up page loaded
     await expect(
       page.getByRole('heading', { name: /sign up|create account/i })
     ).toBeVisible();
 
-    // Fill sign-up form
+    // Fill the sign-up form
     await page.getByLabel('Email').fill(testEmail);
-    await page
-      .getByLabel('Password', { exact: true })
-      .fill(DEFAULT_TEST_PASSWORD);
+    await page.getByLabel('Password', { exact: true }).fill(DEFAULT_TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(DEFAULT_TEST_PASSWORD);
 
-    // Submit form
+    // Submit the form
     await page.getByRole('button', { name: /sign up/i }).click();
 
-    // Wait for either redirect or error
+    // Wait for form to process
     await page.waitForTimeout(3000);
 
-    const hasError = await page
-      .locator('.alert-error')
-      .isVisible()
-      .catch(() => false);
-    const redirected =
-      page.url().includes('/verify-email') || page.url().includes('/profile');
-
-    if (hasError) {
-      const errorText = await page.locator('.alert-error').textContent();
-      console.log('Sign-up error:', errorText);
-      // Rate limiting or other temporary issues shouldn't fail the test permanently
-      test.skip(true, `Sign-up error: ${errorText}`);
-      return;
+    // Check for rate limit error - Supabase free tier limits email sending
+    const rateLimitError = page.locator('text=email rate limit exceeded');
+    if (await rateLimitError.isVisible().catch(() => false)) {
+      throw new Error(
+        'SUPABASE EMAIL RATE LIMIT: Free tier limits confirmation emails to ~4/hour. ' +
+        'FIX: Go to Supabase Dashboard → Project Settings → Authentication → SMTP Settings → ' +
+        'Configure custom SMTP (Resend/SendGrid/Mailgun have free tiers). ' +
+        'Or wait for rate limit to reset (~1 hour).'
+      );
     }
 
-    if (!redirected) {
-      // If still on sign-up page without error, wait a bit more
-      await page.waitForURL(/\/(verify-email|profile)/, { timeout: 10000 });
+    // Check for any other error
+    const errorAlert = page.locator('.alert-error, [role="alert"]');
+    if (await errorAlert.isVisible().catch(() => false)) {
+      const errorText = await errorAlert.textContent();
+      throw new Error(`Sign-up failed: ${errorText}`);
     }
 
+    // Should redirect to verify-email or profile page
+    await page.waitForURL(/\/(verify-email|profile)/, { timeout: 10000 });
+
+    // Verify we landed on the expected page
     const url = page.url();
     expect(url).toMatch(/\/(verify-email|profile)/);
-    console.log('Sign-up successful - redirected to:', url);
   });
 
   test('should show error when signing up with existing email', async ({
