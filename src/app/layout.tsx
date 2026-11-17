@@ -19,7 +19,6 @@ import {
   JsonLdScript,
 } from '@/utils/metadata';
 import PWAInstall from '@/components/PWAInstall';
-import { CountdownBanner } from '@/components/atomic/CountdownBanner';
 import { SetupBanner } from '@/components/SetupBanner';
 
 const geistSans = Geist({
@@ -124,7 +123,6 @@ export default function RootLayout({
           <AuthProvider>
             <AccessibilityProvider>
               <GlobalNav />
-              <CountdownBanner />
               <SetupBanner />
               <ErrorBoundary level="page">
                 <main className="min-h-0 flex-1 overflow-hidden">
